@@ -238,18 +238,16 @@ fun RecentlyPlayedSection(
 
     val songs by remember { database.recentlyPlayedSongs() }
         .collectAsState(initial = null, context = Dispatchers.IO)
-    val recentSongs = songs?.map(RecentSong::song) ?: return
+    // Hidden entirely until there is something to show
+    val recentSongs = songs?.map(RecentSong::song)?.takeIf { it.isNotEmpty() } ?: return
+
+    Spacer(modifier = Modifier.height(Dimensions.spacer))
 
     SectionHeader(
         title = stringResource(id = R.string.recently_played),
-        actionText = stringResource(id = R.string.view_all).takeIf { recentSongs.isNotEmpty() },
+        actionText = stringResource(id = R.string.view_all),
         onAction = onViewAll
     )
-
-    if (recentSongs.isEmpty()) {
-        SectionMessage(text = stringResource(id = R.string.recently_played_empty))
-        return
-    }
 
     LazyRow(contentPadding = PaddingValues(horizontal = 8.dp)) {
         itemsIndexed(items = recentSongs, key = { _, song -> song.id }) { index, song ->

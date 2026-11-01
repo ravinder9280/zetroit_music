@@ -54,6 +54,7 @@ import com.github.musicyou.R
 import com.github.musicyou.database
 import com.github.musicyou.enums.QuickPicksSource
 import com.github.musicyou.models.LocalMenuState
+import com.github.musicyou.ui.components.AppTitle
 import com.github.musicyou.ui.components.HomeScaffold
 import com.github.musicyou.ui.components.NonQueuedMediaItemMenu
 import com.github.musicyou.ui.components.ShimmerHost
@@ -118,6 +119,7 @@ fun QuickPicks(
 
     HomeScaffold(
         title = R.string.app_name,
+        titleContent = { AppTitle() },
         openSearch = openSearch,
         openSettings = openSettings
     ) {
@@ -283,9 +285,8 @@ fun QuickPicks(
                 }
 
                 // Discovery sections; each loads and fails on its own, and the listening
-                // history section also works offline
-                Spacer(modifier = Modifier.height(Dimensions.spacer))
-
+                // history section also works offline. It adds its own spacing, as it is
+                // only shown once something has been played.
                 RecentlyPlayedSection(
                     itemSize = itemSize,
                     onAlbumClick = onAlbumClick,

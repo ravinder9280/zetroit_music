@@ -265,7 +265,6 @@
     <string name="reset_colors_description">Go back to the default custom colors</string>
     <string name="hex_code">Hex code</string>
     <string name="recently_played">Recently played</string>
-    <string name="recently_played_empty">Songs you play will show up here</string>
     <string name="playback_load_failed">Couldn\'t load the songs. Check your connection and try again</string>
     <string name="made_for_you">Made for you</string>
     <string name="made_for_you_new_user">Popular picks to get you started</string>

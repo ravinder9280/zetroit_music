@@ -268,7 +268,6 @@
     <string name="reset_colors_description">Вернуть стандартные свои цвета</string>
     <string name="hex_code">HEX-код</string>
     <string name="recently_played">Недавно прослушанное</string>
-    <string name="recently_played_empty">Здесь появятся прослушанные песни</string>
     <string name="playback_load_failed">Не удалось загрузить песни. Проверьте подключение и повторите попытку</string>
     <string name="made_for_you">Для вас</string>
     <string name="made_for_you_new_user">Популярное для начала</string>

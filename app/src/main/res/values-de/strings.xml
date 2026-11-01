@@ -260,7 +260,6 @@
     <string name="reset_colors_description">Stellt die standardmäßigen benutzerdefinierten Farben wieder her</string>
     <string name="hex_code">Hex-Code</string>
     <string name="recently_played">Zuletzt gespielt</string>
-    <string name="recently_played_empty">Gespielte Songs erscheinen hier</string>
     <string name="playback_load_failed">Songs konnten nicht geladen werden. Prüfe deine Verbindung und versuche es erneut</string>
     <string name="made_for_you">Für dich</string>
     <string name="made_for_you_new_user">Beliebte Titel für den Einstieg</string>

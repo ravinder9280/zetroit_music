@@ -26,6 +26,8 @@ import com.github.musicyou.R
 @Composable
 fun HomeScaffold(
     @StringRes title: Int,
+    // Replaces the plain title text when given
+    titleContent: @Composable (() -> Unit)? = null,
     pop: (() -> Unit)? = null,
     snackbarHost: @Composable (() -> Unit) = {},
     floatingActionButton: @Composable (() -> Unit) = {},
@@ -40,7 +42,7 @@ fun HomeScaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(text = stringResource(id = title))
+                    titleContent?.invoke() ?: Text(text = stringResource(id = title))
                 },
                 navigationIcon = {
                     pop?.let { pop ->

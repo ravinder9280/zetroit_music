@@ -264,7 +264,6 @@
     <string name="reset_colors_description">Torna ai colori personalizzati predefiniti</string>
     <string name="hex_code">Codice esadecimale</string>
     <string name="recently_played">Ascoltati di recente</string>
-    <string name="recently_played_empty">I brani ascoltati appariranno qui</string>
     <string name="playback_load_failed">Impossibile caricare i brani. Controlla la connessione e riprova</string>
     <string name="made_for_you">Per te</string>
     <string name="made_for_you_new_user">Brani popolari per iniziare</string>

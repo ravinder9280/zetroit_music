@@ -265,7 +265,6 @@
 <string name="reset_colors_description">Varsayılan özel renklere geri döner</string>
 <string name="hex_code">Hex kodu</string>
 <string name="recently_played">Son çalınanlar</string>
-<string name="recently_played_empty">Çaldığınız şarkılar burada görünür</string>
 <string name="playback_load_failed">Şarkılar yüklenemedi. Bağlantınızı kontrol edip tekrar deneyin</string>
 <string name="made_for_you">Sizin için</string>
 <string name="made_for_you_new_user">Başlamanız için popüler seçimler</string>
