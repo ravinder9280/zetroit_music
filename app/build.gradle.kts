@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.compose.compiler)
@@ -28,12 +30,29 @@ android {
         }
     }
 
+    // Release signing key, kept outside the repository. Point the zetroitKeystoreProperties
+    // Gradle property (for example in ~/.gradle/gradle.properties) at a keystore.properties file
+    val keystoreProperties = (findProperty("zetroitKeystoreProperties") as String?)
+        ?.let(::file)
+        ?.takeIf { it.exists() }
+        ?.let { file -> Properties().apply { file.inputStream().use { load(it) } } }
+
+    signingConfigs {
+        if (keystoreProperties != null) create("release") {
+            storeFile = file(keystoreProperties.getProperty("storeFile"))
+            storePassword = keystoreProperties.getProperty("storePassword")
+            keyAlias = keystoreProperties.getProperty("keyAlias")
+            keyPassword = keystoreProperties.getProperty("keyPassword")
+        }
+    }
+
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
         }
 
         release {
+            signingConfig = signingConfigs.findByName("release")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
