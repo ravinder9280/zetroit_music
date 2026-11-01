@@ -1,0 +1,14 @@
+package com.github.innertube.models
+
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class GridRenderer(
+    val items: List<Item>?,
+) {
+    @Serializable
+    data class Item(
+        val musicTwoRowItemRenderer: MusicTwoRowItemRenderer?,
+        val musicNavigationButtonRenderer: MusicNavigationButtonRenderer?
+    )
+}
