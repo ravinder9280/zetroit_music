@@ -12,6 +12,8 @@ object Dimensions {
     const val mediumOpacity = 0.75F
     const val lowOpacity = 0.5F
     val spacer = 16.dp
+    // Between the sections of the home screen, which hold large rows of cards
+    val homeSectionSpacer = 32.dp
 
     object thumbnails {
         val album = 128.dp

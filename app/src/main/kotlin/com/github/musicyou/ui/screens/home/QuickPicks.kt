@@ -102,7 +102,7 @@ fun QuickPicks(
     val quickPicksLazyGridState = rememberLazyGridState()
     val sectionTextModifier = Modifier
         .padding(horizontal = 16.dp)
-        .padding(bottom = 8.dp)
+        .padding(bottom = 12.dp)
 
     LaunchedEffect(quickPicksSource) {
         viewModel.loadQuickPicks(quickPicksSource = quickPicksSource)
@@ -294,7 +294,7 @@ fun QuickPicks(
                     onViewAll = onSongsClick
                 )
 
-                Spacer(modifier = Modifier.height(Dimensions.spacer))
+                Spacer(modifier = Modifier.height(Dimensions.homeSectionSpacer))
 
                 MadeForYouSection(
                     result = discoverViewModel.madeForYou,
@@ -306,7 +306,7 @@ fun QuickPicks(
                     onArtistClick = onArtistClick
                 )
 
-                Spacer(modifier = Modifier.height(Dimensions.spacer))
+                Spacer(modifier = Modifier.height(Dimensions.homeSectionSpacer))
 
                 TrendingSection(
                     charts = discoverViewModel.charts,
@@ -319,7 +319,7 @@ fun QuickPicks(
                     onArtistClick = onArtistClick
                 )
 
-                Spacer(modifier = Modifier.height(Dimensions.spacer))
+                Spacer(modifier = Modifier.height(Dimensions.homeSectionSpacer))
 
                 NewReleasesSection(
                     result = discoverViewModel.newReleases,
@@ -329,7 +329,7 @@ fun QuickPicks(
                     onViewAll = onNewReleasesClick
                 )
 
-                Spacer(modifier = Modifier.height(Dimensions.spacer))
+                Spacer(modifier = Modifier.height(Dimensions.homeSectionSpacer))
 
                 MoodsSection(
                     result = discoverViewModel.moodsAndGenres,
@@ -339,7 +339,7 @@ fun QuickPicks(
 
                 relatedPage?.let { related ->
                     related.albums?.let { albums ->
-                        Spacer(modifier = Modifier.height(Dimensions.spacer))
+                        Spacer(modifier = Modifier.height(Dimensions.homeSectionSpacer))
 
                         Text(
                             text = stringResource(id = R.string.related_albums),
@@ -364,7 +364,7 @@ fun QuickPicks(
                     }
 
                     related.artists?.let { artists ->
-                        Spacer(modifier = Modifier.height(Dimensions.spacer))
+                        Spacer(modifier = Modifier.height(Dimensions.homeSectionSpacer))
 
                         Text(
                             text = stringResource(id = R.string.similar_artists),
@@ -389,7 +389,7 @@ fun QuickPicks(
                     }
 
                     related.playlists?.let { playlists ->
-                        Spacer(modifier = Modifier.height(Dimensions.spacer))
+                        Spacer(modifier = Modifier.height(Dimensions.homeSectionSpacer))
 
                         Text(
                             text = stringResource(id = R.string.recommended_playlists),
@@ -425,7 +425,7 @@ fun QuickPicks(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(Dimensions.spacer))
+                    Spacer(modifier = Modifier.height(Dimensions.homeSectionSpacer))
 
                     TextPlaceholder(modifier = sectionTextModifier)
 
@@ -440,7 +440,7 @@ fun QuickPicks(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(Dimensions.spacer))
+                    Spacer(modifier = Modifier.height(Dimensions.homeSectionSpacer))
 
                     TextPlaceholder(modifier = sectionTextModifier)
 

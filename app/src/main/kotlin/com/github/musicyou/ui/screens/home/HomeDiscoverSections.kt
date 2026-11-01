@@ -88,7 +88,7 @@ private fun SectionHeader(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 16.dp, end = 8.dp, bottom = 8.dp)
+            .padding(start = 16.dp, end = 8.dp, bottom = 12.dp)
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
@@ -241,7 +241,7 @@ fun RecentlyPlayedSection(
     // Hidden entirely until there is something to show
     val recentSongs = songs?.map(RecentSong::song)?.takeIf { it.isNotEmpty() } ?: return
 
-    Spacer(modifier = Modifier.height(Dimensions.spacer))
+    Spacer(modifier = Modifier.height(Dimensions.homeSectionSpacer))
 
     SectionHeader(
         title = stringResource(id = R.string.recently_played),
