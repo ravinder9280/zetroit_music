@@ -275,4 +275,6 @@
     <string name="new_releases">New releases</string>
     <string name="browse_by_mood">Browse by mood &amp; activity</string>
     <string name="play_all">Play all</string>
+    <string name="license">License</string>
+    <string name="license_credit">GPL-3.0 · Based on Music You by Daniel Sevillano</string>
 </resources>

@@ -278,4 +278,6 @@
     <string name="new_releases">Новинки</string>
     <string name="browse_by_mood">Настроение и занятия</string>
     <string name="play_all">Слушать всё</string>
+    <string name="license">Лицензия</string>
+    <string name="license_credit">GPL-3.0 · Основано на Music You от Daniel Sevillano</string>
 </resources>

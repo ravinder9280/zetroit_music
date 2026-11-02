@@ -9,3 +9,5 @@
 .cxx
 local.properties
 .kotlin
+# Output of editor Kotlin/Java plugins
+bin/

@@ -7,8 +7,8 @@ set -euo pipefail
 export ANDROID_HOME="${ANDROID_HOME:-$HOME/Android/Sdk}"
 ADB="$ANDROID_HOME/platform-tools/adb"
 EMULATOR="$ANDROID_HOME/emulator/emulator"
-AVD="musicyou"
-PACKAGE="com.github.musicyou.debug"
+AVD="${AVD:-zetroit}"
+PACKAGE="com.zetroit.music.debug"
 
 cd "$(dirname "$0")"
 
@@ -22,7 +22,7 @@ fi
 
 ./gradlew installDebug
 "$ADB" shell am force-stop "$PACKAGE"
-"$ADB" shell am start -n "$PACKAGE/com.github.musicyou.MainActivity" > /dev/null
+"$ADB" shell am start -n "$PACKAGE/com.zetroit.music.MainActivity" > /dev/null
 echo "Zetroit Music is running on the emulator."
 
 if [[ "${1:-}" == "--logs" ]]; then

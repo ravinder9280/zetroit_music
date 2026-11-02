@@ -1,0 +1,324 @@
+package com.zetroit.music.ui.navigation
+
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SheetState
+import androidx.compose.material3.SheetValue
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.lifecycle.Lifecycle
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.toRoute
+import com.zetroit.music.enums.BuiltInPlaylist
+import com.zetroit.music.enums.SettingsSection
+import com.zetroit.music.ui.screens.album.AlbumScreen
+import com.zetroit.music.ui.screens.artist.ArtistScreen
+import com.zetroit.music.ui.screens.builtinplaylist.BuiltInPlaylistScreen
+import com.zetroit.music.ui.screens.discover.MoodScreen
+import com.zetroit.music.ui.screens.discover.NewReleasesScreen
+import com.zetroit.music.ui.screens.home.HomeAlbums
+import com.zetroit.music.ui.screens.home.HomeArtistList
+import com.zetroit.music.ui.screens.home.HomePlaylists
+import com.zetroit.music.ui.screens.home.HomeSongs
+import com.zetroit.music.ui.screens.home.QuickPicks
+import com.zetroit.music.ui.screens.localplaylist.LocalPlaylistScreen
+import com.zetroit.music.ui.screens.playlist.PlaylistScreen
+import com.zetroit.music.ui.screens.search.SearchScreen
+import com.zetroit.music.ui.screens.settings.SettingsPage
+import com.zetroit.music.ui.screens.settings.SettingsScreen
+import com.zetroit.music.utils.homeScreenTabIndexKey
+import com.zetroit.music.utils.homeScreenTabKey
+import com.zetroit.music.utils.rememberPreference
+import kotlinx.coroutines.launch
+import soup.compose.material.motion.animation.rememberSlideDistance
+import kotlin.reflect.KClass
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun Navigation(
+    navController: NavHostController,
+    sheetState: SheetState,
+    intentAction: String?
+) {
+    val scope = rememberCoroutineScope()
+    val slideDistance = rememberSlideDistance()
+    val (savedTab, _) = rememberPreference(homeScreenTabKey, defaultValue = "")
+    val (legacyScreenIndex, _) = rememberPreference(homeScreenTabIndexKey, defaultValue = 0)
+
+    val homeRoute = TopDestinations.list.find { it.key == savedTab && it.isRemembered }?.route
+        // Tabs used to be saved by position, where everything after Songs now lives in Library
+        ?: when (legacyScreenIndex) {
+            0 -> Routes.Home
+            1 -> Routes.Songs
+            else -> Routes.Library
+        }
+
+    NavHost(
+        navController = navController,
+        startDestination = if (intentAction == "com.zetroit.music.action.search") {
+            Routes.Search::class
+        } else homeRoute::class,
+        enterTransition = {
+            NavigationTransitions.enterTransition(
+                targetDestination = targetState.destination,
+                slideDistance = slideDistance
+            )
+        },
+        exitTransition = {
+            NavigationTransitions.exitTransition(
+                targetDestination = targetState.destination,
+                slideDistance = slideDistance
+            )
+        },
+        popEnterTransition = {
+            NavigationTransitions.popEnterTransition(
+                initialDestination = initialState.destination,
+                targetDestination = targetState.destination,
+                slideDistance = slideDistance
+            )
+        },
+        popExitTransition = {
+            NavigationTransitions.popExitTransition(
+                initialDestination = initialState.destination,
+                targetDestination = targetState.destination,
+                slideDistance = slideDistance
+            )
+        },
+        predictivePopEnterTransition = {
+            NavigationTransitions.popEnterTransition(
+                initialDestination = initialState.destination,
+                targetDestination = targetState.destination,
+                slideDistance = slideDistance
+            )
+        },
+        predictivePopExitTransition = {
+            NavigationTransitions.popExitTransition(
+                initialDestination = initialState.destination,
+                targetDestination = targetState.destination,
+                slideDistance = slideDistance
+            )
+        },
+    ) {
+        val navigateToAlbum = { browseId: String ->
+            navController.navigate(route = Routes.Album(id = browseId))
+        }
+
+        val navigateToArtist = { browseId: String ->
+            navController.navigate(route = Routes.Artist(id = browseId))
+        }
+
+        val popDestination = {
+            if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED)
+                navController.popBackStack()
+        }
+
+        fun <T : Any> NavGraphBuilder.playerComposable(
+            route: KClass<T>,
+            content: @Composable AnimatedContentScope.(NavBackStackEntry) -> Unit
+        ) {
+            composable(route = route) { navBackStackEntry ->
+                content(navBackStackEntry)
+
+                BackHandler(enabled = sheetState.currentValue == SheetValue.Expanded) {
+                    scope.launch {
+                        sheetState.partialExpand()
+                    }
+                }
+            }
+        }
+
+        playerComposable(route = Routes.Home::class) {
+            QuickPicks(
+                openSearch = { navController.navigate(route = Routes.Search) },
+                openSettings = { navController.navigate(route = Routes.Settings) },
+                onAlbumClick = navigateToAlbum,
+                onArtistClick = navigateToArtist,
+                onPlaylistClick = { browseId ->
+                    navController.navigate(route = Routes.Playlist(id = browseId))
+                },
+                onMoodClick = { mood ->
+                    mood.endpoint.browseId?.let { browseId ->
+                        navController.navigate(
+                            route = Routes.Mood(title = mood.title, browseId = browseId, params = mood.endpoint.params)
+                        )
+                    }
+                },
+                onNewReleasesClick = { navController.navigate(route = Routes.NewReleases) },
+                // Opens the Songs tab as the bottom bar does
+                onSongsClick = {
+                    navController.navigate(route = Routes.Songs) {
+                        popUpTo(id = navController.graph.findStartDestination().id)
+                        launchSingleTop = true
+                    }
+                },
+                onDownloadsClick = {
+                    navController.navigate(route = Routes.BuiltInPlaylist(index = BuiltInPlaylist.Downloads.ordinal))
+                }
+            )
+        }
+
+        playerComposable(route = Routes.Songs::class) {
+            HomeSongs(
+                openSearch = { navController.navigate(route = Routes.Search) },
+                openSettings = { navController.navigate(route = Routes.Settings) },
+                onGoToAlbum = navigateToAlbum,
+                onGoToArtist = navigateToArtist
+            )
+        }
+
+        playerComposable(route = Routes.Artists::class) {
+            HomeArtistList(
+                pop = popDestination,
+                openSearch = { navController.navigate(route = Routes.Search) },
+                openSettings = { navController.navigate(route = Routes.Settings) },
+                onArtistClick = { artist -> navigateToArtist(artist.id) }
+            )
+        }
+
+        playerComposable(route = Routes.Albums::class) {
+            HomeAlbums(
+                pop = popDestination,
+                openSearch = { navController.navigate(route = Routes.Search) },
+                openSettings = { navController.navigate(route = Routes.Settings) },
+                onAlbumClick = { album -> navigateToAlbum(album.id) }
+            )
+        }
+
+        playerComposable(route = Routes.Library::class) {
+            HomePlaylists(
+                openSearch = { navController.navigate(route = Routes.Search) },
+                openSettings = { navController.navigate(route = Routes.Settings) },
+                onArtistsClick = { navController.navigate(route = Routes.Artists) },
+                onAlbumsClick = { navController.navigate(route = Routes.Albums) },
+                onBuiltInPlaylist = { playlistIndex ->
+                    navController.navigate(route = Routes.BuiltInPlaylist(index = playlistIndex))
+                },
+                onPlaylistClick = { playlist ->
+                    navController.navigate(route = Routes.LocalPlaylist(id = playlist.id))
+                }
+            )
+        }
+
+        playerComposable(route = Routes.Mood::class) { navBackStackEntry ->
+            val route: Routes.Mood = navBackStackEntry.toRoute()
+
+            MoodScreen(
+                title = route.title,
+                browseId = route.browseId,
+                params = route.params,
+                pop = popDestination,
+                onPlaylistClick = { browseId ->
+                    navController.navigate(route = Routes.Playlist(id = browseId))
+                }
+            )
+        }
+
+        playerComposable(route = Routes.NewReleases::class) {
+            NewReleasesScreen(
+                pop = popDestination,
+                onAlbumClick = navigateToAlbum
+            )
+        }
+
+        playerComposable(route = Routes.Artist::class) { navBackStackEntry ->
+            val route: Routes.Artist = navBackStackEntry.toRoute()
+
+            ArtistScreen(
+                browseId = route.id,
+                pop = popDestination,
+                onAlbumClick = navigateToAlbum,
+                onArtistClick = navigateToArtist,
+                onPlaylistClick = { browseId ->
+                    navController.navigate(route = Routes.Playlist(id = browseId))
+                }
+            )
+        }
+
+        playerComposable(route = Routes.Album::class) { navBackStackEntry ->
+            val route: Routes.Album = navBackStackEntry.toRoute()
+
+            AlbumScreen(
+                browseId = route.id,
+                pop = popDestination,
+                onAlbumClick = navigateToAlbum,
+                onGoToArtist = navigateToArtist
+            )
+        }
+
+        playerComposable(route = Routes.Playlist::class) { navBackStackEntry ->
+            val route: Routes.Playlist = navBackStackEntry.toRoute()
+
+            PlaylistScreen(
+                browseId = route.id,
+                pop = popDestination,
+                onGoToAlbum = navigateToAlbum,
+                onGoToArtist = navigateToArtist
+            )
+        }
+
+        playerComposable(route = Routes.Settings::class) {
+            SettingsScreen(
+                pop = popDestination,
+                onGoToSettingsPage = { index ->
+                    navController.navigate(Routes.SettingsPage(index = index))
+                }
+            )
+        }
+
+        playerComposable(route = Routes.SettingsPage::class) { navBackStackEntry ->
+            val route: Routes.SettingsPage = navBackStackEntry.toRoute()
+
+            SettingsPage(
+                section = SettingsSection.entries[route.index],
+                pop = popDestination
+            )
+        }
+
+        playerComposable(route = Routes.Search::class) {
+            SearchScreen(
+                pop = {
+                    if (intentAction == "com.zetroit.music.action.search") {
+                        navController.navigate(route = homeRoute) {
+                            popUpTo(route = Routes.Search) {
+                                inclusive = true
+                            }
+                        }
+                    } else popDestination()
+                },
+                onAlbumClick = navigateToAlbum,
+                onArtistClick = navigateToArtist,
+                onPlaylistClick = { browseId ->
+                    navController.navigate(route = Routes.Playlist(id = browseId))
+                }
+            )
+        }
+
+        playerComposable(route = Routes.BuiltInPlaylist::class) { navBackStackEntry ->
+            val route: Routes.BuiltInPlaylist = navBackStackEntry.toRoute()
+
+            BuiltInPlaylistScreen(
+                builtInPlaylist = BuiltInPlaylist.entries[route.index],
+                pop = popDestination,
+                onGoToAlbum = navigateToAlbum,
+                onGoToArtist = navigateToArtist
+            )
+        }
+
+        playerComposable(route = Routes.LocalPlaylist::class) { navBackStackEntry ->
+            val route: Routes.LocalPlaylist = navBackStackEntry.toRoute()
+
+            LocalPlaylistScreen(
+                playlistId = route.id,
+                pop = popDestination,
+                onGoToAlbum = navigateToAlbum,
+                onGoToArtist = navigateToArtist
+            )
+        }
+    }
+}

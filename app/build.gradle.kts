@@ -8,7 +8,7 @@ plugins {
 }
 
 android {
-    namespace = "com.github.musicyou"
+    namespace = "com.zetroit.music"
 
     compileSdk {
         version = release(version = 37) {
@@ -17,10 +17,10 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.github.musicyou"
+        applicationId = "com.zetroit.music"
         minSdk = 24
-        versionCode = 17
-        versionName = "1.1.3"
+        versionCode = 18
+        versionName = "2.0.0"
     }
 
     splits {

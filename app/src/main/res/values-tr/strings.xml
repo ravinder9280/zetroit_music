@@ -275,4 +275,6 @@
 <string name="new_releases">Yeni çıkanlar</string>
 <string name="browse_by_mood">Ruh hali ve etkinliğe göre</string>
 <string name="play_all">Tümünü çal</string>
+<string name="license">Lisans</string>
+<string name="license_credit">GPL-3.0 · Daniel Sevillano\'nun Music You uygulamasına dayanır</string>
 </resources>

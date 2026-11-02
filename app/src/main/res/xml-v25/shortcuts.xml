@@ -5,8 +5,8 @@
         android:shortcutShortLabel="@string/search">
 
         <intent
-            android:action="com.github.musicyou.action.search"
-            android:targetClass="com.github.musicyou.MainActivity"
-            android:targetPackage="com.github.musicyou" />
+            android:action="com.zetroit.music.action.search"
+            android:targetClass="com.zetroit.music.MainActivity"
+            android:targetPackage="com.zetroit.music" />
     </shortcut>
 </shortcuts>

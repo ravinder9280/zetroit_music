@@ -274,4 +274,6 @@
     <string name="new_releases">Nuove uscite</string>
     <string name="browse_by_mood">Per umore e attività</string>
     <string name="play_all">Riproduci tutto</string>
+    <string name="license">Licenza</string>
+    <string name="license_credit">GPL-3.0 · Basato su Music You di Daniel Sevillano</string>
 </resources>
