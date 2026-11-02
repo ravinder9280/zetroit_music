@@ -18,6 +18,7 @@ import io.ktor.client.request.setBody
 // rather than their titles, because the titles are translated.
 
 private const val NEW_RELEASES_ALBUMS = "FEmusic_new_releases_albums"
+private const val NEW_RELEASES_VIDEOS = "FEmusic_new_releases_videos"
 
 private suspend fun Innertube.browseSections(
     browseId: String,
@@ -79,6 +80,49 @@ suspend fun Innertube.newReleases(country: String, all: Boolean = false) = runCa
     }
 
     albumsSection?.twoRowItems?.mapNotNull(::newReleaseAlbumItem).orEmpty()
+}
+
+/** New music videos, newest first, with YouTube's subtitle (like "Artist • 7.8M views"). */
+suspend fun Innertube.newMusicVideos(country: String, all: Boolean = false) = runCatchingNonCancellable {
+    val sections = browseSections(
+        browseId = if (all) NEW_RELEASES_VIDEOS else "FEmusic_new_releases",
+        country = country
+    )
+
+    val videosSection = if (all) sections.firstOrNull()
+    else sections.find { section ->
+        section.musicCarouselShelfRenderer
+            ?.header
+            ?.musicCarouselShelfBasicHeaderRenderer
+            ?.moreContentButton
+            ?.buttonRenderer
+            ?.navigationEndpoint
+            ?.browseEndpoint
+            ?.browseId == NEW_RELEASES_VIDEOS
+    }
+
+    videosSection?.twoRowItems?.mapNotNull(::newMusicVideo).orEmpty()
+}
+
+private fun newMusicVideo(renderer: MusicTwoRowItemRenderer): Innertube.SuggestedResult? {
+    // A few videos open an audio track page; their play button still points at the video
+    val watch = renderer.navigationEndpoint?.watchEndpoint ?: renderer.playEndpoint ?: return null
+    if (watch.videoId == null) return null
+    val name = renderer.title?.runs?.firstOrNull()?.text ?: return null
+
+    val video = Innertube.VideoItem(
+        info = Innertube.Info(name = name, endpoint = watch),
+        // The linked runs of the subtitle are the artists; unlinked ones lead the subtitle,
+        // as in "Artist • 3.4M views"
+        authors = (renderer.subtitle?.runs?.filter { it.navigationEndpoint?.browseEndpoint != null }
+            ?.takeIf { it.isNotEmpty() }
+            ?: renderer.subtitle?.splitBySeparator()?.firstOrNull())
+            ?.map<_, Innertube.Info<NavigationEndpoint.Endpoint.Browse>>(Innertube::Info),
+        viewsText = null,
+        durationText = null,
+        thumbnail = renderer.thumbnailRenderer?.musicThumbnailRenderer?.thumbnail?.thumbnails?.lastOrNull()
+    )
+    return Innertube.SuggestedResult(item = video, subtitle = renderer.subtitle?.text)
 }
 
 // The subtitle reads "Single • Artist & Artist", unlike other album lists that end with the year

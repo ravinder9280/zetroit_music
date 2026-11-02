@@ -5,15 +5,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.github.innertube.Innertube
 import com.github.innertube.requests.chartsPage
 import com.github.innertube.requests.moodsAndGenres
+import com.github.innertube.requests.newMusicVideos
 import com.github.innertube.requests.newReleases
 import com.github.innertube.requests.nextPage
 import com.github.innertube.requests.playlistPage
 import com.github.innertube.requests.relatedPage
 import com.zetroit.music.database
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -38,33 +41,45 @@ class HomeDiscoverViewModel : ViewModel() {
         private set
     var newReleases: Result<List<Innertube.AlbumItem>>? by mutableStateOf(null)
         private set
+    var newMusicVideos: Result<List<Innertube.SuggestedResult>>? by mutableStateOf(null)
+        private set
     var moodsAndGenres: Result<Innertube.MoodsAndGenresPage>? by mutableStateOf(null)
         private set
     var madeForYou: Result<MadeForYou>? by mutableStateOf(null)
         private set
 
-    /** Loads every section that has not loaded successfully yet. */
-    suspend fun load() = coroutineScope {
-        launch {
-            if (newReleases?.isSuccess != true) {
-                newReleases = null
-                newReleases = Innertube.newReleases(country = COUNTRY) ?: return@launch
-            }
-        }
+    private val jobs = mutableMapOf<String, Job>()
 
-        launch {
-            if (moodsAndGenres?.isSuccess != true) {
-                moodsAndGenres = null
-                moodsAndGenres = Innertube.moodsAndGenres(country = COUNTRY) ?: return@launch
-            }
-        }
-
-        launch {
-            if (trendingSongs?.isSuccess != true) loadTrending()
-            // New users get recommendations based on what is trending
-            if (madeForYou?.isSuccess != true) loadMadeForYou()
-        }
+    /**
+     * Starts loading a section unless it has loaded or is loading already. Sections ask for
+     * their data when they first scroll into view, like YouTube Music's home only fetches more
+     * shelves as you scroll. The work runs in the view model, so scrolling a section away again
+     * does not cancel it halfway.
+     */
+    private fun loadOnce(key: String, isLoaded: Boolean, block: suspend () -> Unit): Job? {
+        if (isLoaded) return null
+        jobs[key]?.takeIf { it.isActive }?.let { return it }
+        return viewModelScope.launch { block() }.also { jobs[key] = it }
     }
+
+    fun requestNewReleases() = loadOnce("newReleases", newReleases?.isSuccess == true) {
+        newReleases = null
+        newReleases = Innertube.newReleases(country = COUNTRY)
+    }
+
+    fun requestNewMusicVideos() = loadOnce("newMusicVideos", newMusicVideos?.isSuccess == true) {
+        newMusicVideos = null
+        newMusicVideos = Innertube.newMusicVideos(country = COUNTRY)
+    }
+
+    fun requestMoods() = loadOnce("moods", moodsAndGenres?.isSuccess == true) {
+        moodsAndGenres = null
+        moodsAndGenres = Innertube.moodsAndGenres(country = COUNTRY)
+    }
+
+    fun requestTrending() = loadOnce("trending", trendingSongs?.isSuccess == true) { loadTrending() }
+
+    fun requestMadeForYou() = loadOnce("madeForYou", madeForYou?.isSuccess == true) { loadMadeForYou() }
 
     private suspend fun loadTrending() {
         charts = null
@@ -100,6 +115,7 @@ class HomeDiscoverViewModel : ViewModel() {
 
         madeForYou = runCatching {
             if (seeds.isEmpty()) {
+                requestTrending()?.join()
                 val seed = trendingSongs?.getOrNull()?.firstOrNull()?.key
                     ?: error("Nothing to base recommendations on")
 

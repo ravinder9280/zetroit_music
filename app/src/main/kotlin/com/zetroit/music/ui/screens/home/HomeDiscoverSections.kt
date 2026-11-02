@@ -62,11 +62,13 @@ import com.zetroit.music.ui.items.AlbumItem
 import com.zetroit.music.ui.items.ItemContainer
 import com.zetroit.music.ui.items.ItemPlaceholder
 import com.zetroit.music.ui.items.ListItemPlaceholder
+import com.zetroit.music.ui.items.MusicVideoCard
 import com.zetroit.music.ui.items.PlaylistItem
 import com.zetroit.music.ui.items.SongItem
 import com.zetroit.music.ui.styling.Dimensions
 import com.zetroit.music.ui.styling.px
 import com.zetroit.music.utils.asMediaItem
+import com.zetroit.music.utils.forcePlay
 import com.zetroit.music.utils.forcePlayAtIndex
 import com.zetroit.music.utils.thumbnail
 import com.zetroit.music.viewmodels.MadeForYou
@@ -451,6 +453,78 @@ fun NewReleasesSection(
                 modifier = Modifier.widthIn(max = itemSize),
                 album = album,
                 onClick = { onAlbumClick(album.key) }
+            )
+        }
+    }
+}
+
+@Composable
+fun NewMusicVideosSection(
+    result: Result<List<Innertube.SuggestedResult>>?,
+    onRetry: () -> Unit,
+    onAlbumClick: (String) -> Unit,
+    onArtistClick: (String) -> Unit,
+    onViewAll: () -> Unit
+) {
+    val binder = LocalPlayerServiceBinder.current
+    val menuState = LocalMenuState.current
+
+    if (result == null) {
+        ShimmerHost {
+            TextPlaceholder(modifier = sectionTextModifier)
+            Row(modifier = Modifier.padding(start = 8.dp)) {
+                repeat(2) {
+                    Box(
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .size(width = 260.dp, height = 146.dp)
+                            .clip(MaterialTheme.shapes.large)
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                    )
+                }
+            }
+        }
+        return
+    }
+
+    val videos = result.getOrNull()
+
+    SectionHeader(
+        title = stringResource(id = R.string.new_music_videos),
+        actionText = stringResource(id = R.string.view_all).takeIf { !videos.isNullOrEmpty() },
+        onAction = onViewAll
+    )
+
+    if (videos.isNullOrEmpty()) {
+        SectionMessage(
+            text = stringResource(id = if (videos == null) R.string.home_error else R.string.no_items_found),
+            onRetry = onRetry
+        )
+        return
+    }
+
+    LazyRow(contentPadding = PaddingValues(horizontal = 8.dp)) {
+        items(items = videos, key = { it.item.key }) { result ->
+            val video = result.item as Innertube.VideoItem
+            MusicVideoCard(
+                video = video,
+                subtitle = result.subtitle,
+                modifier = Modifier.width(260.dp),
+                onClick = {
+                    binder?.stopRadio()
+                    binder?.player?.forcePlay(video.asMediaItem)
+                    binder?.setupRadio(video.info?.endpoint)
+                },
+                onLongClick = {
+                    menuState.display {
+                        NonQueuedMediaItemMenu(
+                            onDismiss = menuState::hide,
+                            mediaItem = video.asMediaItem,
+                            onGoToAlbum = onAlbumClick,
+                            onGoToArtist = onArtistClick
+                        )
+                    }
+                }
             )
         }
     }

@@ -21,6 +21,7 @@ import com.zetroit.music.ui.screens.album.AlbumScreen
 import com.zetroit.music.ui.screens.artist.ArtistScreen
 import com.zetroit.music.ui.screens.builtinplaylist.BuiltInPlaylistScreen
 import com.zetroit.music.ui.screens.discover.MoodScreen
+import com.zetroit.music.ui.screens.discover.NewMusicVideosScreen
 import com.zetroit.music.ui.screens.discover.NewReleasesScreen
 import com.zetroit.music.ui.screens.home.HomeAlbums
 import com.zetroit.music.ui.screens.home.HomeArtistList
@@ -150,6 +151,7 @@ fun Navigation(
                     }
                 },
                 onNewReleasesClick = { navController.navigate(route = Routes.NewReleases) },
+                onNewMusicVideosClick = { navController.navigate(route = Routes.NewMusicVideos) },
                 // Opens the Songs tab as the bottom bar does
                 onSongsClick = {
                     navController.navigate(route = Routes.Songs) {
@@ -216,6 +218,14 @@ fun Navigation(
                 onPlaylistClick = { browseId ->
                     navController.navigate(route = Routes.Playlist(id = browseId))
                 }
+            )
+        }
+
+        playerComposable(route = Routes.NewMusicVideos::class) {
+            NewMusicVideosScreen(
+                pop = popDestination,
+                onAlbumClick = navigateToAlbum,
+                onArtistClick = navigateToArtist
             )
         }
 

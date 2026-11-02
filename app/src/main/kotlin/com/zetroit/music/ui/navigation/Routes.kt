@@ -47,4 +47,7 @@ sealed class Routes {
 
     @Serializable
     data object NewReleases
+
+    @Serializable
+    data object NewMusicVideos
 }

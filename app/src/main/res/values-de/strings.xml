@@ -272,4 +272,5 @@
     <string name="play_all">Alle abspielen</string>
     <string name="license">Lizenz</string>
     <string name="license_credit">GPL-3.0 · Basiert auf Music You von Daniel Sevillano</string>
+    <string name="new_music_videos">Neue Musikvideos</string>
 </resources>
