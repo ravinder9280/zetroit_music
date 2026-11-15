@@ -419,6 +419,64 @@ fun TrendingSection(
 }
 
 @Composable
+fun HeardInShortsSection(
+    result: Result<List<Innertube.SongItem>>?,
+    itemSize: Dp,
+    songItemWidth: Dp,
+    onRetry: () -> Unit,
+    onAlbumClick: (String) -> Unit,
+    onArtistClick: (String) -> Unit
+) {
+    val binder = LocalPlayerServiceBinder.current
+    val menuState = LocalMenuState.current
+
+    if (result == null) {
+        CardsPlaceholder(itemSize = itemSize, songRows = 4)
+        return
+    }
+
+    val songs = result.getOrNull()
+
+    SectionHeader(
+        title = stringResource(id = R.string.heard_in_shorts),
+        actionText = stringResource(id = R.string.play_all).takeIf { !songs.isNullOrEmpty() },
+        onAction = {
+            songs?.let {
+                binder?.stopRadio()
+                binder?.player?.forcePlayAtIndex(it.map(Innertube.SongItem::asMediaItem), 0)
+            }
+        }
+    )
+
+    if (songs.isNullOrEmpty()) {
+        SectionMessage(
+            text = stringResource(id = if (songs == null) R.string.home_error else R.string.no_items_found),
+            onRetry = onRetry
+        )
+        return
+    }
+
+    SongGrid(
+        songs = songs,
+        itemWidth = songItemWidth,
+        onClick = { index ->
+            binder?.stopRadio()
+            binder?.player?.forcePlayAtIndex(songs.map(Innertube.SongItem::asMediaItem), index)
+        },
+        onLongClick = { song ->
+            menuState.display {
+                NonQueuedMediaItemMenu(
+                    onDismiss = menuState::hide,
+                    mediaItem = song.asMediaItem,
+                    onGoToAlbum = onAlbumClick,
+                    onGoToArtist = onArtistClick
+                )
+            }
+        }
+    )
+}
+
+@Composable
 fun NewReleasesSection(
     result: Result<List<Innertube.AlbumItem>>?,
     itemSize: Dp,

@@ -19,8 +19,8 @@ android {
     defaultConfig {
         applicationId = "com.zetroit.music"
         minSdk = 24
-        versionCode = 19
-        versionName = "2.1.0"
+        versionCode = 20
+        versionName = "2.2.0"
     }
 
     splits {

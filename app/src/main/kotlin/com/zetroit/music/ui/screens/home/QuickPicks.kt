@@ -347,6 +347,24 @@ fun QuickPicks(
                     }
                 }
 
+                item(key = "heardInShorts") {
+                    // Fetched only once this section scrolls into view
+                    LaunchedEffect(Unit) { discoverViewModel.requestHeardInShorts() }
+
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Spacer(modifier = Modifier.height(Dimensions.homeSectionSpacer))
+
+                        HeardInShortsSection(
+                            result = discoverViewModel.heardInShorts,
+                            itemSize = itemSize,
+                            songItemWidth = itemInHorizontalGridWidth,
+                            onRetry = { discoverViewModel.requestHeardInShorts() },
+                            onAlbumClick = onAlbumClick,
+                            onArtistClick = onArtistClick
+                        )
+                    }
+                }
+
                 item(key = "newMusicVideos") {
                     // Fetched only once this section scrolls into view
                     LaunchedEffect(Unit) { discoverViewModel.requestNewMusicVideos() }

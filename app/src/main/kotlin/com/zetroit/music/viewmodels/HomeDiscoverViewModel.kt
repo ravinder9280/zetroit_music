@@ -41,6 +41,8 @@ class HomeDiscoverViewModel : ViewModel() {
         private set
     var newReleases: Result<List<Innertube.AlbumItem>>? by mutableStateOf(null)
         private set
+    var heardInShorts: Result<List<Innertube.SongItem>>? by mutableStateOf(null)
+        private set
     var newMusicVideos: Result<List<Innertube.SuggestedResult>>? by mutableStateOf(null)
         private set
     var moodsAndGenres: Result<Innertube.MoodsAndGenresPage>? by mutableStateOf(null)
@@ -65,6 +67,14 @@ class HomeDiscoverViewModel : ViewModel() {
     fun requestNewReleases() = loadOnce("newReleases", newReleases?.isSuccess == true) {
         newReleases = null
         newReleases = Innertube.newReleases(country = COUNTRY)
+    }
+
+    // YouTube's own "Heard in Shorts" shelf needs a signed-in account, so this uses the public
+    // YouTube Charts ranking of the songs most used in Shorts in India
+    fun requestHeardInShorts() = loadOnce("heardInShorts", heardInShorts?.isSuccess == true) {
+        heardInShorts = null
+        heardInShorts = Innertube.playlistPage(browseId = SHORTS_CHART_INDIA)
+            ?.map { it.songsPage?.items.orEmpty() }
     }
 
     fun requestNewMusicVideos() = loadOnce("newMusicVideos", newMusicVideos?.isSuccess == true) {
@@ -157,6 +167,9 @@ class HomeDiscoverViewModel : ViewModel() {
     }
 
     companion object {
+        /** YouTube Charts: Daily Top Songs on Shorts - India */
+        private const val SHORTS_CHART_INDIA = "VLPL4fGSI1pDJn5xvqrIYJwdirv_Eca0TDWd"
+
         /** The home screen discovers music popular in India. */
         const val COUNTRY = "IN"
 
